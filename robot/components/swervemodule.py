@@ -28,9 +28,10 @@ class SwerveModule:
 
         self.requested_speed = 0
 
-        self.pid_controller = PIDController(0.00055, 0.0, 0.0)
+        self.pid_controller = PIDController(0.00035, 0.00035, 0.0)
+        # I TUNE DAMPER -- SUB 0.00035 TEMP VALUE FOR 2/12/24
         self.pid_controller.enableContinuousInput(0.0, 4096.0)
-        self.pid_controller.setTolerance(1.5, 0.5)
+        self.pid_controller.setTolerance(0.05, 0.2)
         
     def get_encoder_ticks(self):
         return self.encoder.getSelectedSensorPosition()
@@ -48,8 +49,8 @@ class SwerveModule:
             deg *= -1
         deg *= 360
         return deg
-
-    @staticmethod
+ 
+    @staticmethod                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     
     def degree_to_ticks(degree):
         return (degree / 360) * ENCODER_SIZE
     
@@ -66,18 +67,20 @@ class SwerveModule:
                 deg += 180
                 deg %= 360
             
-        self.requested_speed = speed
+        self.requested_speed = speed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
         self.set_deg(deg)
         
     def execute(self):
-        error = self.pid_controller.calculate(self.encoder.getSelectedSensorPosition())
+        self.error = self.pid_controller.calculate(self.encoder.getSelectedSensorPosition(), self.pid_controller.getSetpoint()) 
         output = 0
 
-        if not self.pid_controller.atSetpoint():
-            output = max(min(error, 1), -1)
+        if self.pid_controller.atSetpoint():
+            output = 0
+        elif not self.pid_controller.atSetpoint():
+            output = max(min(self.error, 1), -1)
 
         self.rotateMotor.set(output)
-        self.driveMotor.set(max(min(self.requested_speed, 0.7), -0.7)) 
+        self.driveMotor.set(max(min(self.requested_speed, 0.6), -0.6)) 
         # ORIGINAL VALUE AT 0.5 SUBJECT TO CHANGE
             
 

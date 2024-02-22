@@ -1,7 +1,8 @@
 import wpilib
-import phoenix5
 from magicbot import MagicRobot
+import phoenix5
 from phoenix5 import NeutralMode
+import phoenix5.sensors
 
 from components import swervedrive, swervemodule
 
@@ -40,31 +41,31 @@ class MyRobot(MagicRobot):
         # self.sd: NetworkTable = NetworkTables.getTable('SmartDashboard')
         self.controller = wpilib.XboxController(1)
 
-        self.frontLeftModule_driveMotor = phoenix5.WPI_TalonSRX(1)
-        self.frontLeftModule_rotateMotor = phoenix5.WPI_TalonSRX(2)
+        self.frontLeftModule_driveMotor = phoenix5.WPI_TalonFX(1)
+        self.frontLeftModule_rotateMotor = phoenix5.WPI_TalonFX(2)
         self.frontLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.frontRightModule_driveMotor = phoenix5.WPI_TalonSRX(3)
-        self.frontRightModule_rotateMotor = phoenix5.WPI_TalonSRX(4)
+        self.frontRightModule_driveMotor = phoenix5.WPI_TalonFX(3)
+        self.frontRightModule_rotateMotor = phoenix5.WPI_TalonFX(4)
         self.frontRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.rearRightModule_driveMotor = phoenix5.WPI_TalonSRX(5)
-        self.rearRightModule_rotateMotor = phoenix5.WPI_TalonSRX(6)
+        self.rearRightModule_driveMotor = phoenix5.WPI_TalonFX(5)
+        self.rearRightModule_rotateMotor = phoenix5.WPI_TalonFX(6)
         self.rearRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.rearLeftModule_driveMotor = phoenix5.WPI_TalonSRX(7)
-        self.rearLeftModule_rotateMotor = phoenix5.WPI_TalonSRX(8)
+        self.rearLeftModule_driveMotor = phoenix5.WPI_TalonFX(7)
+        self.rearLeftModule_rotateMotor = phoenix5.WPI_TalonFX(8)
         self.rearLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.frontLeftModule_encoder = self.frontLeftModule_rotateMotor
-        self.frontRightModule_encoder = self.frontRightModule_rotateMotor
-        self.rearLeftModule_encoder = self.rearLeftModule_rotateMotor
-        self.rearRightModule_encoder = self.rearRightModule_rotateMotor
+        self.frontLeftModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
+        self.frontRightModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
+        self.rearLeftModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
+        self.rearRightModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER 
 
         self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": -55, "inverted":True, "allow_reverse":True, "encoder":self.frontLeftModule_encoder}
-        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": -45, "inverted":True, "allow_reverse":True, "encoder":self.frontRightModule_encoder}
-        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": -9, "inverted":False, "allow_reverse":True, "encoder":self.rearLeftModule_encoder}
-        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": -26, "inverted":True, "allow_reverse":True, "encoder":self.rearRightModule_encoder}
+        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 134, "inverted":False, "allow_reverse":True, "encoder":self.frontRightModule_encoder}
+        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": -50, "inverted":False, "allow_reverse":True, "encoder":self.rearLeftModule_encoder}
+        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": -26, "inverted":False, "allow_reverse":True, "encoder":self.rearRightModule_encoder}
 
         self.frontLeftModule = swervemodule.SwerveModule(self.frontLeftModule_cfg, self.frontLeftModule_driveMotor, self.frontLeftModule_rotateMotor)
         self.frontRightModule = swervemodule.SwerveModule(self.frontRightModule_cfg, self.frontRightModule_driveMotor, self.frontRightModule_rotateMotor)
@@ -104,6 +105,16 @@ class MyRobot(MagicRobot):
         print(((self.frontRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
         print(((self.rearLeftModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
         print(((self.rearRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
+        print(" ")
+        print(self.frontLeftModule.pid_controller.atSetpoint())
+        print(self.frontRightModule.pid_controller.atSetpoint())
+        print(self.rearLeftModule.pid_controller.atSetpoint())
+        print(self.rearRightModule.pid_controller.atSetpoint())
+        print(" ")
+        print(self.frontLeftModule.error)
+        print(self.frontRightModule.error)
+        print(self.rearLeftModule.error)
+        print(self.rearRightModule.error)
         print(" ")
         print(self.frontLeftModule.pid_controller.getSetpoint())
         print(self.frontRightModule.pid_controller.getSetpoint())
