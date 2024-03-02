@@ -1,9 +1,8 @@
 import wpilib
 from magicbot import MagicRobot
-import phoenix5
-from phoenix5 import NeutralMode
-import phoenix5.sensors
-
+import phoenix6
+from phoenix6 import hardware
+from phoenix6 import controls
 from components import swervedrive, swervemodule
 
 ModuleConfig = swervemodule.ModuleConfig
@@ -30,8 +29,8 @@ pip install robotpy[rev]
 3. python robot/robot.py deploy --skip-tests (OPTION 2, without CD)
 '''
 
-BRAKE_MODE = NeutralMode(2)
-COAST_MODE = NeutralMode(1)
+# BRAKE_MODE = NeutralMode(2)
+# COAST_MODE = NeutralMode(1)
 class MyRobot(MagicRobot):
 
 
@@ -41,38 +40,39 @@ class MyRobot(MagicRobot):
         # self.sd: NetworkTable = NetworkTables.getTable('SmartDashboard')
         self.controller = wpilib.XboxController(1)
 
-        self.frontLeftModule_driveMotor = phoenix5.WPI_TalonFX(1)
-        self.frontLeftModule_rotateMotor = phoenix5.WPI_TalonFX(2)
-        self.frontLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
+        self.frontLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(1)
+        self.frontLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(2)
+        # self.frontLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.frontRightModule_driveMotor = phoenix5.WPI_TalonFX(3)
-        self.frontRightModule_rotateMotor = phoenix5.WPI_TalonFX(4)
-        self.frontRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
+        self.frontRightModule_driveMotor = phoenix6.hardware.talon_fx.TalonFX(3)
+        self.frontRightModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(4)
+        # self.frontRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.rearRightModule_driveMotor = phoenix5.WPI_TalonFX(5)
-        self.rearRightModule_rotateMotor = phoenix5.WPI_TalonFX(6)
-        self.rearRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
+        self.rearRightModule_driveMotor = phoenix6.hardware.talon_fx.TalonFX(5)
+        self.rearRightModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(6)
+        # self.rearRightModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.rearLeftModule_driveMotor = phoenix5.WPI_TalonFX(7)
-        self.rearLeftModule_rotateMotor = phoenix5.WPI_TalonFX(8)
-        self.rearLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
+        self.rearLeftModule_driveMotor = phoenix6.hardware.talon_fx.TalonFX(7)
+        self.rearLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(8)
+        # self.rearLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
-        self.frontLeftModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
-        self.frontRightModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
-        self.rearLeftModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER
-        self.rearRightModule_encoder = phoenix5.sensors.CANCoder(0) # PLACEHOLDER 
+        self.frontLeftModule_encoder = phoenix6.hardware.cancoder.CANcoder(11) 
+        self.frontRightModule_encoder = phoenix6.hardware.cancoder.CANcoder(12) 
+        self.rearLeftModule_encoder = phoenix6.hardware.cancoder.CANcoder(14) 
+        self.rearRightModule_encoder = phoenix6.hardware.cancoder.CANcoder(13)
 
-        self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": -55, "inverted":True, "allow_reverse":True, "encoder":self.frontLeftModule_encoder}
-        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 134, "inverted":False, "allow_reverse":True, "encoder":self.frontRightModule_encoder}
-        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": -50, "inverted":False, "allow_reverse":True, "encoder":self.rearLeftModule_encoder}
-        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": -26, "inverted":False, "allow_reverse":True, "encoder":self.rearRightModule_encoder}
+        self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": 0, "inverted":True, "allow_reverse":True, "encoder":self.frontLeftModule_encoder}
+        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.frontRightModule_encoder}
+        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.rearLeftModule_encoder}
+        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.rearRightModule_encoder}
 
-        self.frontLeftModule = swervemodule.SwerveModule(self.frontLeftModule_cfg, self.frontLeftModule_driveMotor, self.frontLeftModule_rotateMotor)
+        self.frontLeftModule = swervemodule.SwerveModule(self.frontLeftModule_cfg, self.frontLeftModule_rotateMotor, self.frontLeftModule_rotateMotor)
         self.frontRightModule = swervemodule.SwerveModule(self.frontRightModule_cfg, self.frontRightModule_driveMotor, self.frontRightModule_rotateMotor)
         self.rearLeftModule = swervemodule.SwerveModule(self.rearLeftModule_cfg, self.rearLeftModule_driveMotor, self.rearLeftModule_rotateMotor)
         self.rearRightModule = swervemodule.SwerveModule(self.rearRightModule_cfg, self.rearRightModule_driveMotor, self.rearRightModule_rotateMotor)
 
         self.drive = swervedrive.SwerveDrive(self.frontRightModule, self.frontLeftModule, self.rearRightModule, self.rearLeftModule)
+        self.deg = 0
 
     def autonomousInit(self):
         # self.drive.flush()
@@ -86,42 +86,19 @@ class MyRobot(MagicRobot):
         self.drive.move(y, x, rcw)
 
     def teleopPeriodic(self):
-
         self.move(self.controller.getLeftY(), self.controller.getLeftX(), self.controller.getRightX())
         self.drive.execute()
+        # if(self.controller.getAButtonReleased()):
+        #     self.deg -= 90
 
-        # # Encoder Positions % 4096
-        # self.sd.putValue("FL_encoder_pos", ((self.frontLeftModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        # self.sd.putValue("FR_encoder_pos", ((self.frontRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        # self.sd.putValue("RL_encoder_pos", ((self.rearLeftModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        # self.sd.putValue("RR_encoder_pos", ((self.rearRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        # # Module setpoints
-        # self.sd.putValue("FL_setpoint", self.frontLeftModule.pid_controller.getSetpoint())
-        # self.sd.putValue("FR_setpoint", self.frontRightModule.pid_controller.getSetpoint())
-        # self.sd.putValue("RL_setpoint", self.rearLeftModule.pid_controller.getSetpoint())
-        # self.sd.putValue("RR_setpoint", self.rearRightModule.pid_controller.getSetpoint())
-
-        print(((self.frontLeftModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        print(((self.frontRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        print(((self.rearLeftModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        print(((self.rearRightModule_encoder.getSelectedSensorPosition() % 4096) + 4096) % 4096)
-        print(" ")
-        print(self.frontLeftModule.pid_controller.atSetpoint())
-        print(self.frontRightModule.pid_controller.atSetpoint())
-        print(self.rearLeftModule.pid_controller.atSetpoint())
-        print(self.rearRightModule.pid_controller.atSetpoint())
-        print(" ")
-        print(self.frontLeftModule.error)
-        print(self.frontRightModule.error)
-        print(self.rearLeftModule.error)
-        print(self.rearRightModule.error)
-        print(" ")
-        print(self.frontLeftModule.pid_controller.getSetpoint())
-        print(self.frontRightModule.pid_controller.getSetpoint())
-        print(self.rearLeftModule.pid_controller.getSetpoint())
-        print(self.rearRightModule.pid_controller.getSetpoint())
-        print("________________________________________________")
-
+        # self.rearRightModule.move(0, self.deg)
+        # self.rearRightModule.execute()
+        print(self.frontLeftModule_encoder.get_position())
+        # if(self.controller.getAButton()):
+        #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0.1))
+        # else:
+        #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0))
+        # print(self.frontRightModule_encoder.get_position().value)
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)

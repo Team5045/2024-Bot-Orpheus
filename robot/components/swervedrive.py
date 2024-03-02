@@ -39,9 +39,6 @@ class SwerveDrive:
 
         self.width = (28 / 12) / 2 # (Inch / 12 = Foot) / 2
         self.length = (28 / 12) / 2 # (Inch / 12 = Foot) / 2
-
-    def orient(self):
-        self.encoder_mod_set = 0.0
         
     def flush(self):
         '''Function will be called to reset motors (make them flush)'''
