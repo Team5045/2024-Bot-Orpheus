@@ -80,14 +80,12 @@ class SwerveDrive:
         self.set_raw_rcw(rcw)
     
     def calculate_vectors(self):
-        
-        ratio = math.hypot(self.length, self.width)
-        
+                
         # Velocity of quadrants
-        frontX = self.requested_vectors['strafe'] - (self.requested_vectors['rcw'] * (self.length / ratio))
-        rearX = self.requested_vectors['strafe'] + (self.requested_vectors['rcw'] * (self.length / ratio))
-        leftY = self.requested_vectors['fwd'] - (self.requested_vectors['rcw'] * (self.width / ratio))
-        rightY = self.requested_vectors['fwd'] + (self.requested_vectors['rcw'] * (self.width / ratio))
+        frontX = self.requested_vectors['strafe'] - (self.requested_vectors['rcw'])
+        rearX = self.requested_vectors['strafe'] + (self.requested_vectors['rcw'])
+        leftY = self.requested_vectors['fwd'] - (self.requested_vectors['rcw'])
+        rightY = self.requested_vectors['fwd'] + (self.requested_vectors['rcw'])
 
         # Speed for quadrants
         frontLeft_speed = math.hypot(frontX, rightY)

@@ -10,16 +10,16 @@ ModuleConfig = swervemodule.ModuleConfig
 #NOTE: Download and Installs for RoboRIO
 # make sure imaging is up to date
 '''
-python -m robotpy installer download python
-python -m robotpy installer install python
-python -m robotpy installer download robotpy[phoenix5]
-python -m robotpy installer install robotpy[phoenix5]
-python -m robotpy installer download robotpy[rev]
-python -m robotpy installer install robotpy[rev]
+py -m robotpy installer download python
+py -m robotpy installer install python
+py -m robotpy installer download robotpy[phoenix6]
+py -m robotpy installer install robotpy[phoenix6]
+py -m robotpy installer download robotpy[rev]
+py -m robotpy installer install robotpy[rev]
 
 --------------- PERSONAL INSTALLS --------------------
 
-pip install robotpy[phoenix5]
+pip install robotpy[phoenix6]
 pip install robotpy[rev]
 '''
 # NOTE: Deployment instructions
@@ -27,6 +27,7 @@ pip install robotpy[rev]
 1. cd robot
 2. python robot.py deploy --skip-tests (OPTION 1, with CD)
 3. python robot/robot.py deploy --skip-tests (OPTION 2, without CD)
+py -m robotpy deploy --skip-tests
 '''
 
 # BRAKE_MODE = NeutralMode(2)
@@ -40,7 +41,7 @@ class MyRobot(MagicRobot):
         # self.sd: NetworkTable = NetworkTables.getTable('SmartDashboard')
         self.controller = wpilib.XboxController(1)
 
-        self.frontLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(1)
+        self.frontLeftModule_driveMotor = phoenix6.hardware.talon_fx.TalonFX(1)
         self.frontLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(2)
         # self.frontLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
 
@@ -61,18 +62,18 @@ class MyRobot(MagicRobot):
         self.rearLeftModule_encoder = phoenix6.hardware.cancoder.CANcoder(14) 
         self.rearRightModule_encoder = phoenix6.hardware.cancoder.CANcoder(13)
 
-        self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": 0, "inverted":True, "allow_reverse":True, "encoder":self.frontLeftModule_encoder}
-        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.frontRightModule_encoder}
-        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.rearLeftModule_encoder}
-        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": 0, "inverted":False, "allow_reverse":True, "encoder":self.rearRightModule_encoder}
+        self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": 0.21, "inverted":False, "allow_reverse":False, "encoder":self.frontLeftModule_encoder}
+        self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 0.13, "inverted":True, "allow_reverse":False, "encoder":self.frontRightModule_encoder}
+        self.rearLeftModule_cfg = {"sd_prefix":'rearLeft_Module', "zero": 0.20, "inverted":False, "allow_reverse":False, "encoder":self.rearLeftModule_encoder}
+        self.rearRightModule_cfg = {"sd_prefix":'rearRight_Module', "zero": 0.26, "inverted":False, "allow_reverse":False, "encoder":self.rearRightModule_encoder}
 
-        self.frontLeftModule = swervemodule.SwerveModule(self.frontLeftModule_cfg, self.frontLeftModule_rotateMotor, self.frontLeftModule_rotateMotor)
+        self.frontLeftModule = swervemodule.SwerveModule(self.frontLeftModule_cfg, self.frontLeftModule_driveMotor, self.frontLeftModule_rotateMotor)
         self.frontRightModule = swervemodule.SwerveModule(self.frontRightModule_cfg, self.frontRightModule_driveMotor, self.frontRightModule_rotateMotor)
         self.rearLeftModule = swervemodule.SwerveModule(self.rearLeftModule_cfg, self.rearLeftModule_driveMotor, self.rearLeftModule_rotateMotor)
         self.rearRightModule = swervemodule.SwerveModule(self.rearRightModule_cfg, self.rearRightModule_driveMotor, self.rearRightModule_rotateMotor)
 
         self.drive = swervedrive.SwerveDrive(self.frontRightModule, self.frontLeftModule, self.rearRightModule, self.rearLeftModule)
-        self.deg = 0
+
 
     def autonomousInit(self):
         # self.drive.flush()
@@ -93,7 +94,11 @@ class MyRobot(MagicRobot):
 
         # self.rearRightModule.move(0, self.deg)
         # self.rearRightModule.execute()
-        print(self.frontLeftModule_encoder.get_position())
+        print(self.frontLeftModule_encoder.get_position().value)
+        print(self.frontRightModule_encoder.get_position().value)
+        print(self.rearLeftModule_encoder.get_position().value)
+        print(self.rearRightModule_encoder.get_position().value)
+
         # if(self.controller.getAButton()):
         #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0.1))
         # else:

@@ -28,10 +28,10 @@ class SwerveModule:
 
         self.requested_speed = 0
 
-        self.pid_controller = PIDController(0.25, 0.0, 0.0)
+        self.pid_controller = PIDController(1.5, 0.0, 0.0)
         # I TUNE DAMPER -- SUB 0.00035 TEMP VALUE FOR 2/12/24
         self.pid_controller.enableContinuousInput(0, 1)
-        self.pid_controller.setTolerance(0.005, 0.2)
+        self.pid_controller.setTolerance(0.0005, 0.2)
         
     def get_encoder_rotations(self):
         return self.encoder.get_position().value
@@ -66,9 +66,12 @@ class SwerveModule:
                 speed *= -1
                 deg += 180
                 deg %= 360
-            
+        
+        if self.inverted:
+            self.requested_speed *= -1
+
         self.requested_speed = speed        
-        # print(f"{deg=}")                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 
+        
         self.set_deg(deg)
         
     def execute(self):
