@@ -4,6 +4,7 @@ import phoenix6
 from phoenix6 import hardware
 from phoenix6 import controls
 from components import swervedrive, swervemodule
+import phoenix5
 
 ModuleConfig = swervemodule.ModuleConfig
 
@@ -41,6 +42,7 @@ class MyRobot(MagicRobot):
         # self.sd: NetworkTable = NetworkTables.getTable('SmartDashboard')
         self.controller = wpilib.XboxController(1)
 
+        '''DRIVETRAIN MOTORS, ORDERED BY MODULE'''
         self.frontLeftModule_driveMotor = phoenix6.hardware.talon_fx.TalonFX(1)
         self.frontLeftModule_rotateMotor = phoenix6.hardware.talon_fx.TalonFX(2)
         # self.frontLeftModule_rotateMotor.setNeutralMode(BRAKE_MODE)
@@ -61,6 +63,10 @@ class MyRobot(MagicRobot):
         self.frontRightModule_encoder = phoenix6.hardware.cancoder.CANcoder(12) 
         self.rearLeftModule_encoder = phoenix6.hardware.cancoder.CANcoder(14) 
         self.rearRightModule_encoder = phoenix6.hardware.cancoder.CANcoder(13)
+
+        '''SHOOTER MOTORS'''
+        self.shooter_rotmotor = phoenix5.TalonFX(98) # Placeholder ID num
+        self.shooter_fmotor = phoenix5.TalonFX(99) # Also placeholder
 
         self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": 0.21, "inverted":False, "allow_reverse":False, "encoder":self.frontLeftModule_encoder}
         self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 0.13, "inverted":True, "allow_reverse":False, "encoder":self.frontRightModule_encoder}
@@ -89,15 +95,22 @@ class MyRobot(MagicRobot):
     def teleopPeriodic(self):
         self.move(self.controller.getLeftY(), self.controller.getLeftX(), self.controller.getRightX())
         self.drive.execute()
-        # if(self.controller.getAButtonReleased()):
-        #     self.deg -= 90
 
-        # self.rearRightModule.move(0, self.deg)
-        # self.rearRightModule.execute()
-        print(self.frontLeftModule_encoder.get_position().value)
-        print(self.frontRightModule_encoder.get_position().value)
-        print(self.rearLeftModule_encoder.get_position().value)
-        print(self.rearRightModule_encoder.get_position().value)
+        # NOTE: meant as test code for shooter
+        if(self.controller.getLeftBumper()): self.shooter_rotmotor.set(-0.3)
+        elif(self.controller.getRightBumper()): self.shooter_rotmotor.set(0.3)
+        else: self.shooter_rotmotor.set(0.0)
+
+        if(self.controller.getAButton()): self.shooter_fmotor.set(0.5)
+        elif(self.controller.getBackButton()): self.shooter_fmotor.set(-0.3)
+        else: self.shooter_fmotor.set(0.0)
+
+        # NOTE: Obtain values from encoders for shooter preset and limits
+
+        # print(self.frontLeftModule_encoder.get_position().value)
+        # print(self.frontRightModule_encoder.get_position().value)
+        # print(self.rearLeftModule_encoder.get_position().value)
+        # print(self.rearRightModule_encoder.get_position().value)
 
         # if(self.controller.getAButton()):
         #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0.1))
