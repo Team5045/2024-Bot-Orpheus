@@ -66,7 +66,7 @@ class MyRobot(MagicRobot):
 
         '''SHOOTER MOTORS'''
         self.shooter_rotmotor = phoenix5.TalonFX(98) # Placeholder ID num
-        self.shooter_fmotor = phoenix5.TalonFX(99) # Also placeholder
+        # self.shooter_fmotor = phoenix5.TalonFX(99) # Also placeholder
 
         self.frontLeftModule_cfg = {"sd_prefix":'frontLeft_Module', "zero": 0.21, "inverted":False, "allow_reverse":False, "encoder":self.frontLeftModule_encoder}
         self.frontRightModule_cfg = {"sd_prefix":'frontRight_Module', "zero": 0.13, "inverted":True, "allow_reverse":False, "encoder":self.frontRightModule_encoder}
@@ -80,6 +80,12 @@ class MyRobot(MagicRobot):
 
         self.drive = swervedrive.SwerveDrive(self.frontRightModule, self.frontLeftModule, self.rearRightModule, self.rearLeftModule)
 
+        self.right_pivotmotor = phoenix6.hardware.talon_fx.TalonFX(21)
+        self.left_pivotmotor = phoenix6.hardware.talon_fx.TalonFX(22)
+        # self.climb_motor = phoenix6.hardware.talon_fx.TalonFX(9)
+        
+        self.controller = wpilib.XboxController(1)
+        self.climb_hold = False
 
     def autonomousInit(self):
         # self.drive.flush()
@@ -96,27 +102,29 @@ class MyRobot(MagicRobot):
         self.move(self.controller.getLeftY(), self.controller.getLeftX(), self.controller.getRightX())
         self.drive.execute()
 
-        # NOTE: meant as test code for shooter
-        if(self.controller.getLeftBumper()): self.shooter_rotmotor.set(-0.3)
-        elif(self.controller.getRightBumper()): self.shooter_rotmotor.set(0.3)
-        else: self.shooter_rotmotor.set(0.0)
+        # Troll Climb Code
+        # if(self.controller.getAButton()): self.climb_motor.set_control(controls.DutyCycleOut(0.15))
+        # elif(self.controller.getBButton()): self.climb_motor.set_control(controls.DutyCycleOut(-0.15))
+        # else: self.climb_motor.set_control(controls.DutyCycleOut(0.0))
+        # if(self.controller.getXButtonPressed()): self.climb_hold = not self.climb_hold
+        # if(self.climb_hold == True): self.climb_motor.set_control(controls.DutyCycleOut(-0.07))
+      
+        
+        # Shooter Pivot Rotation, TESTING ONLY
+        # NOTE: Pivot code will eventually be migrated to a separate class along with shooter code
+        if(self.controller.getRightBumper()): 
+            self.left_pivotmotor.set_control(controls.DutyCycleOut(0.03))
+            self.right_pivotmotor.set_control(controls.DutyCycleOut(-0.03))
+        elif(self.controller.getLeftBumper()): 
+            self.left_pivotmotor.set_control(controls.DutyCycleOut(-0.03))
+            self.right_pivotmotor.set_control(controls.DutyCycleOut(0.03))  
+        else:
+            self.left_pivotmotor.set_control(controls.DutyCycleOut(0.0))
+            self.right_pivotmotor.set_control(controls.DutyCycleOut(0.0))  
 
-        if(self.controller.getAButton()): self.shooter_fmotor.set(0.5)
-        elif(self.controller.getBackButton()): self.shooter_fmotor.set(-0.3)
-        else: self.shooter_fmotor.set(0.0)
+        print("left", self.left_pivotmotor.get_position().value)
+        print("right", self.right_pivotmotor.get_position().value)
 
-        # NOTE: Obtain values from encoders for shooter preset and limits
-
-        # print(self.frontLeftModule_encoder.get_position().value)
-        # print(self.frontRightModule_encoder.get_position().value)
-        # print(self.rearLeftModule_encoder.get_position().value)
-        # print(self.rearRightModule_encoder.get_position().value)
-
-        # if(self.controller.getAButton()):
-        #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0.1))
-        # else:
-        #     self.frontRightModule_rotateMotor.set_control(controls.DutyCycleOut(0))
-        # print(self.frontRightModule_encoder.get_position().value)
 
 if __name__ == "__main__":
     wpilib.run(MyRobot)
